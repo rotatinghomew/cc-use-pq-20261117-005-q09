@@ -11,6 +11,7 @@ from story_patterns.analysis.revision_drift import compare_revisions
 from story_patterns.analysis.votes import vote_distribution
 from story_patterns.analysis.sample_profile import build_sample_profile
 from story_patterns.analysis.crosstab import consensus_crosstab
+from story_patterns.anonymization import decision_reader_code, policy_metadata
 from story_patterns.catalog.history import lineage_warnings, revision_lineage
 from story_patterns.errors import ConflictError
 
@@ -37,6 +38,7 @@ def build_report(stories: list[dict], decisions: dict[tuple[str, int], list[dict
     outcome_coverage: Counter = Counter()
     resolution_counts: Counter = Counter()
     used_decisions = []
+    review_codes = set()
     story_results = []
     for story in stories:
         identity = (story["story_id"], story["revision"])
@@ -58,6 +60,7 @@ def build_report(stories: list[dict], decisions: dict[tuple[str, int], list[dict
         if final_outcome not in {None, "unknown"}:
             final_outcome_counts[final_outcome] += 1
         used_decisions.extend(item["decision_id"] for item in votes)
+        review_codes.update(decision_reader_code(item) for item in votes)
         story_results.append({
             "story_id": story["story_id"], "revision": story["revision"],
             "title": story["title"], "tradition": story["tradition"],
@@ -69,6 +72,7 @@ def build_report(stories: list[dict], decisions: dict[tuple[str, int], list[dict
             "adjudication_rationale": adjudication["rationale"] if adjudication else None,
             "adjudication_evidence_event_ids": adjudication["evidence_event_ids"] if adjudication else [],
             "reviewer_count": len(votes),
+            "reviewer_codes": sorted(decision_reader_code(item) for item in votes),
         })
     return {
         "criteria": {"tradition": tradition, "minimum_reviewers": minimum,
@@ -93,6 +97,7 @@ def build_report(stories: list[dict], decisions: dict[tuple[str, int], list[dict
         "reader_vote_distribution": vote_distribution(stories, decisions),
         "sample_profile": build_sample_profile(stories),
         "pattern_outcome_crosstab": consensus_crosstab(story_results),
+        "reviewer_anonymization": policy_metadata(review_codes),
         "revision_lineage": {"scope": "selected story revisions", "stories": revision_lineage(stories),
                              "warnings": lineage_warnings(revision_lineage(stories))},
         "revision_changes": compare_revisions(stories),
@@ -104,6 +109,7 @@ def build_report(stories: list[dict], decisions: dict[tuple[str, int], list[dict
                 f"{story_id}@{revision}": sorted(batch_ids)
                 for (story_id, revision), batch_ids in sorted((origins or {}).items())
             },
+            "reviewer_codes": sorted(review_codes),
         },
     }
 

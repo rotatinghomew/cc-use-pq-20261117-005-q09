@@ -36,6 +36,18 @@ def render_report(report: dict) -> str:
     coverage = report["coverage"]["pattern"]
     lines.extend(_table([{"status": key, "count": value} for key, value in coverage.items()],
                         [("status", "Pattern review status"), ("count", "Stories")]))
+    policy = report.get("reviewer_anonymization")
+    if policy:
+        lines.extend(["", "## Reviewer anonymization", "",
+                      "Reader labels below are local synthetic codes, not names and not login credentials.", "",
+                      f"- Policy: {policy['policy']}",
+                      f"- Method: {policy['method']}",
+                      f"- Grouping basis: {policy['identity_basis']}",
+                      f"- Code rotation: {policy['code_rotation']}",
+                      f"- Historical exports: {policy['historical_reports']}",
+                      f"- Authentication: {policy['authentication']}", ""])
+        lines.extend(_table([{"code": code} for code in policy["codes_in_report"]],
+                            [("code", "Reviewer code in this report")]))
     lines.extend(["", "## Provenance", "", "Story revisions and decision IDs used:", "",
                   "```json", json.dumps(report["provenance"], ensure_ascii=False, indent=2), "```", ""])
     return "\n".join(lines)

@@ -31,7 +31,7 @@ class AgreementMetricsTests(unittest.TestCase):
         votes = [decision(annotator=name) for name in ["a", "b", "c"]]
         pairs = pairwise_agreement({("tale-a", 1): votes})["pairs"]
         self.assertEqual(len(pairs), 3)
-        self.assertEqual([row["annotators"] for row in pairs], [["a", "b"], ["a", "c"], ["b", "c"]])
+        self.assertEqual([row["reviewer_codes"] for row in pairs], [["a", "b"], ["a", "c"], ["b", "c"]])
 
 
 class EvidenceCoverageTests(unittest.TestCase):

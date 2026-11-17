@@ -32,6 +32,13 @@ def parser() -> argparse.ArgumentParser:
     adjudicator = commands.add_parser("adjudicate", help="record a moderator resolution separately from votes")
     adjudicator.add_argument("--database", required=True)
     adjudicator.add_argument("--file", required=True)
+    rotator = commands.add_parser(
+        "rotate-reviewer-code",
+        help="issue a new blind display code; the stable reviewer identity and existing votes are unchanged",
+    )
+    rotator.add_argument("--database", required=True)
+    rotator.add_argument("--code", required=True,
+                         help="current code, an older code, or the local label used when the vote was first recorded")
     history = commands.add_parser("history", help="inspect all reader and moderator revisions")
     history.add_argument("--database", required=True)
     history.add_argument("--story-id", required=True)
@@ -88,6 +95,8 @@ def execute(arguments: argparse.Namespace) -> dict:
         return app.record_decision(read_json(arguments.file))
     if arguments.command == "adjudicate":
         return app.record_adjudication(read_json(arguments.file))
+    if arguments.command == "rotate-reviewer-code":
+        return app.rotate_reviewer_code(arguments.code)
     if arguments.command == "history":
         return app.review_history(arguments.story_id, arguments.revision)
     if arguments.command == "report":

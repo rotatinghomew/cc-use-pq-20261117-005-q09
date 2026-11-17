@@ -3,6 +3,7 @@ from __future__ import annotations
 from collections import defaultdict
 
 from story_patterns.analysis.report import _consensus
+from story_patterns.anonymization import decision_reader_code
 
 
 def build_review_queue(stories: list[dict], decisions: dict, minimum: int, adjudications: dict | None = None) -> list[dict]:
@@ -29,7 +30,7 @@ def build_review_queue(stories: list[dict], decisions: dict, minimum: int, adjud
             "story_id": story["story_id"], "revision": story["revision"], "title": story["title"],
             "tradition": story["tradition"], "status": status, "reviewer_count": len(votes),
             "pattern": pattern, "outcome": outcome, "missing_evidence_event_ids": missing_evidence,
-            "reviewer_names": sorted(item["annotator"] for item in votes),
+            "reviewer_codes": sorted(decision_reader_code(item) for item in votes),
             "adjudication_id": adjudication["adjudication_id"] if adjudication else None,
             "final_pattern": adjudication["pattern"] if adjudication else pattern,
             "final_outcome": adjudication["youngest_outcome"] if adjudication else outcome,

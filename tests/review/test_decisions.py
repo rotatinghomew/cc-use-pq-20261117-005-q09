@@ -14,7 +14,8 @@ class DecisionValidationTests(AppCase, unittest.TestCase):
         self.app.record_decision(record)
         stored = self.app.review.decisions_for("tale-a", 1)[0]
         self.assertEqual(stored["evidence_event_ids"], ["first", "third"])
-        self.assertEqual(stored["annotator"], "reader-a")
+        self.assertNotIn("annotator", stored)
+        self.assertRegex(stored["reviewer_code"], r"^R-[0-9A-F]{8}$")
 
     def test_review_requires_existing_exact_story_revision(self):
         for story_id, revision in [("missing", 1), ("tale-a", 2)]:

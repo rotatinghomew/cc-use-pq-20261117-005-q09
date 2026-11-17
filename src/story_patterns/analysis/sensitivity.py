@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+from story_patterns.anonymization import decision_reader_code
+
+
 def leave_one_reader_out(stories: list[dict], decisions: dict, minimum: int) -> dict:
     from story_patterns.analysis.report import _consensus
 
@@ -22,7 +25,7 @@ def leave_one_reader_out(stories: list[dict], decisions: dict, minimum: int) -> 
             outcome_changed = (outcome, outcome_status) != (baseline_outcome, baseline_outcome_status)
             fragile_pattern += pattern_changed
             fragile_outcome += outcome_changed
-            removals.append({"omitted_annotator": omitted["annotator"],
+            removals.append({"omitted_reviewer_code": decision_reader_code(omitted),
                              "pattern": pattern, "pattern_status": pattern_status,
                              "pattern_changed": pattern_changed,
                              "youngest_outcome": outcome, "outcome_status": outcome_status,
